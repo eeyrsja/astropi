@@ -31,18 +31,42 @@ camera.resolution = (1296,972)
 
 
 def create_csv(data_file):
-    logger.info(f"creating CSV file: {data_file}")
+    """
+    this function creates a new .csv file and puts the titles in.
+
+    csv files done by Ben Alexander
+
+    :param data_file:
+    :return:
+    """
     with open(data_file, 'w') as f:
         writer = csv.writer(f)
-        header = ("Counter", "Date/time", "Temperature", "Humidity")
+        header = ("Time", "Latitude", "Longitude", "Cloud_Percent", "Closest_Town", "Photo_Link")
         writer.writerow(header)
 
 
-def add_csv_data(data_file, data):
-    logger.info(f"adding info to CSV file: {data_file}")
+# results
+
+
+def add_results_to_csv(data_file, Time, Latitude, Longitude, Cloud_Percent, Closest_Town, Photo_Link)
+    """
+    this function puts the data in a .csv file.
+    
+    csv files done by Ben Alexander
+    
+    :param data_file: 
+    :param Time: 
+    :param Latitude: 
+    :param Longitude: 
+    :param Cloud_Percent: 
+    :param Closest_Town: 
+    :param Photo_Link: 
+    :return: 
+    """
     with open(data_file, 'a') as f:
         writer = csv.writer(f)
-        writer.writerow(data)
+        header = (Time, Latitude, Longitude, Cloud_Percent, Closest_Town, Photo_Link)
+        writer.writerow(header)
 
 
 def get_iss_position():
@@ -61,7 +85,7 @@ def get_day_night():
 
 
 def get_nearby_town(latitude, longitude):
-    #TODO Write this function!
+    # TODO Write this function!
     return("Balsall Common")
 
 
@@ -77,7 +101,7 @@ while (now_time < start_time + timedelta(minutes=2)):
     nearby_town = get_nearby_town()
 
     # Write the results to CSV file
-    row = (counter, datetime.now(), sense.temperature, sense.humidity)
+    row = (counter, datetime.now(), sense.temperature, sense.humidity) #TODO this is wrong!
     add_csv_data(data_file, row)
 
     # Log the event
