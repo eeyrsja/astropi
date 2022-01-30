@@ -91,20 +91,21 @@ def get_cloud_percent(photo):
 
 # Set up the output file
 create_csv(data_file)
+counter =1
 
 # Main program loop for 3 hours
 while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minutes
-
+    # Take a photo and save it
+    camera.start_preview()
+    sleep(2) # Camera warm-up time
+    camera.capture(f"{base_folder}/pic_{counter:04}.jpg")
     # Get measurements
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
     day_or_night = get_day_night()
     iss_position = get_iss_position()
-    cloud_percent = get_cloud_percent()
-    #nearby_town = get_nearby_town()
-
+    cloud_percent = get_cloud_percent(f"{base_folder}/pic_{counter:04}.jpg")
 
     # Write the results to CSV file
-    # (data_file, Time, Day night, Latitude, Longitude, Cloud_Percent, Photo_Link):
     add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent,"PHOTO1.JPG")
 
     # Log the event
@@ -112,5 +113,6 @@ while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minute
     counter += 1
     sleep(6) # 1 minute sleep #TODO - check how long to sleep for
 
-    # Update the current time
+    # Update the current time and counter
     now_time = datetime.now()
+    counter = counter + 1
