@@ -6,9 +6,9 @@ import csv
 from pathlib import Path
 from datetime import datetime, timedelta
 from logzero import logger, logfile
-from picamera import PiCamera
-from orbit import ISS
-from skyfield.api import load
+#from picamera import PiCamera
+#from orbit import ISS
+#from skyfield.api import load
 from time import sleep
 
 # Running time information
@@ -22,12 +22,12 @@ data_file = base_folder/'data.csv'
 logfile(base_folder/"events.log")
 
 # Parameters for ISS position finding
-ephemeris = load('de421.bsp')
-timescale = load.timescale()
+#ephemeris = load('de421.bsp') TODO - uncomment to run on astropi
+#timescale = load.timescale() TODO - uncomment to run on astropi
 
 # Set up the camera
-camera = PiCamera()
-camera.resolution = (1296,972)
+#camera = PiCamera() TODO - uncomment to run on astropi
+#camera.resolution = (1296,972) TODO - uncomment to run on astropi
 
 
 def create_csv(data_file):
@@ -41,32 +41,32 @@ def create_csv(data_file):
     """
     with open(data_file, 'w') as f:
         writer = csv.writer(f)
-        header = ("Time", "Latitude", "Longitude", "Cloud_Percent", "Closest_Town", "Photo_Link")
+        header = ("Time", "Day_or_Night", "Latitude", "Longitude", "Cloud_Percent", "Photo_Link")
         writer.writerow(header)
 
 
 # results
 
 
-def add_results_to_csv(data_file, Time, Latitude, Longitude, Cloud_Percent, Closest_Town, Photo_Link)
+def add_results_to_csv(data_file, Time, Day_or_Night, Latitude, Longitude, Cloud_Percent, Photo_Link):
     """
     this function puts the data in a .csv file.
     
     csv files done by Ben Alexander
-    
-    :param data_file: 
-    :param Time: 
+
+    :param data_file:
+    :param Time:
+    :param Day_or_Night:
     :param Latitude: 
     :param Longitude: 
-    :param Cloud_Percent: 
-    :param Closest_Town: 
+    :param Cloud_Percent:
     :param Photo_Link: 
     :return: 
     """
     with open(data_file, 'a') as f:
         writer = csv.writer(f)
-        header = (Time, Latitude, Longitude, Cloud_Percent, Closest_Town, Photo_Link)
-        writer.writerow(header)
+        result = (Time, Day_or_Night, Latitude, Longitude, Cloud_Percent, Photo_Link)
+        writer.writerow(result)
 
 
 def get_iss_position():
@@ -84,30 +84,33 @@ def get_day_night():
         return "night"
 
 
-def get_nearby_town(latitude, longitude):
-    # TODO Write this function!
-    return("Balsall Common")
+def get_cloud_percent(photo):
+    # TODO - lots of work to do!
+    return 20
 
 
 # Set up the output file
 create_csv(data_file)
 
 # Main program loop for 3 hours
-while (now_time < start_time + timedelta(minutes=2)):
+while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minutes
 
     # Get measurements
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+    day_or_night = get_day_night()
     iss_position = get_iss_position()
-    day_night = get_day_night()
-    nearby_town = get_nearby_town()
+    cloud_percent = get_cloud_percent()
+    #nearby_town = get_nearby_town()
+
 
     # Write the results to CSV file
-    row = (counter, datetime.now(), sense.temperature, sense.humidity) #TODO this is wrong!
-    add_csv_data(data_file, row)
+    # (data_file, Time, Day night, Latitude, Longitude, Cloud_Percent, Photo_Link):
+    add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent,"PHOTO1.JPG")
 
     # Log the event
     logger.info(f"main loop counter: {counter}")
     counter += 1
-    sleep(60)
+    sleep(6) # 1 minute sleep #TODO - check how long to sleep for
 
     # Update the current time
     now_time = datetime.now()
