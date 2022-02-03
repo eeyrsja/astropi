@@ -125,7 +125,7 @@ while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minute
     photo_file = base_folder/f'photo_{counter:04}.jpg'
     camera.start_preview()
     sleep(2) # Camera warm-up time
-    camera.capture()
+    camera.capture(photo_file)
 
     # Get measurements
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
