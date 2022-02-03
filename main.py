@@ -6,7 +6,7 @@
 #   Victor Florek
 #   Kieran Pennalls
 
-# Hello from Balsall Common!
+# Hello from Balsall Common and Coventry!
 
 import csv
 from pathlib import Path
@@ -21,11 +21,13 @@ from time import sleep
 start_time = datetime.now()
 now_time = datetime.now()
 counter = 1
+logger.info(f"Started running: {start_time}")
 
 # Set up base folder and files
 base_folder = Path(__file__).parent.resolve()
 data_file = base_folder/'data.csv'
 logfile(base_folder/"events.log")
+logger.info(f"Base folder: {base_folder}")
 
 # Parameters for ISS position finding
 ephemeris = load('de421.bsp')
@@ -33,7 +35,7 @@ timescale = load.timescale()
 
 # Set up the camera
 camera = PiCamera()
-camera.resolution = (1296, 972)
+camera.resolution = (1440, 1080)
 
 
 def create_csv(data_file):
@@ -45,6 +47,7 @@ def create_csv(data_file):
     :param data_file: the name of the file to save the results in
     :return: True or false if it can make the new file
     """
+    logger.info(f"Function: create_csv")
     try:
         with open(data_file, 'w') as f:
             writer = csv.writer(f)
@@ -71,6 +74,7 @@ def add_results_to_csv(data_file, time, day_or_night, latitude, longitude, cloud
     :param photo_file: link to the photo
     :return: True or false if it can add the result to the file
     """
+    logger.info(f"Function: add_results_to_csv")
     try:
         with open(data_file, 'a') as f:
             writer = csv.writer(f)
@@ -88,6 +92,7 @@ def get_iss_position():
 
     :return: lat, long
     """
+    logger.info(f"Function: get_iss_position")
     location = ISS.coordinates()
     latitude = location.latitude.degrees
     longitude = location.longitude.degrees
@@ -100,6 +105,7 @@ def get_day_night():
 
     :return: day or night
     """
+    logger.info(f"Function: get_day_night")
     t = timescale.now()
     if ISS.at(t).is_sunlit(ephemeris):
         return "day"
@@ -109,6 +115,7 @@ def get_day_night():
 
 def get_cloud_percent(photo):
     # TODO - lots of work to do!
+    logger.info(f"Function: get_cloud_percent")
     return 20
 
 
@@ -123,9 +130,10 @@ counter =1
 while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minutes
     # Take a photo and save it
     photo_file = base_folder/f'photo_{counter:04}.jpg'
-    camera.start_preview()
+    camera.start_preview(alpha=128)
     sleep(2) # Camera warm-up time
-    camera.capture(photo_file)
+    camera.capture(str(photo_file))
+    camera.stop_preview()
 
     # Get measurements
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -137,8 +145,7 @@ while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minute
     add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent, photo_file)
 
     # Log the event
-    logger.info(f"main loop counter: {counter}")
-    counter += 1
+    logger.info(f"Main loop counter: {counter}")
     sleep(6) # 1 minute sleep #TODO - check how long to sleep for
 
     # Update the current time and counter

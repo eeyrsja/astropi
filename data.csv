@@ -1,21 +1,13 @@
-Time,Day_or_Night,Latitude,Longitude,Cloud_Percent,Closest_Town,Photo_Link
-2022-01-30 14:04,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:04,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:04,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:05,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
-2022-01-30 14:06,day,0,0,0,Gybelish,PHOTO1.JPG
+Time,Day_or_Night,Latitude,Longitude,Cloud_Percent,Photo_File
+2022-02-03 19:27,day,-50.68691421711682,137.27051545472094,20,/home/pi/astropi/astropi/photo_0001.jpg
+2022-02-03 19:27,day,-50.56306032540891,138.08764418121524,20,/home/pi/astropi/astropi/photo_0002.jpg
+2022-02-03 19:27,day,-50.430790602904686,138.91361422250313,20,/home/pi/astropi/astropi/photo_0003.jpg
+2022-02-03 19:27,day,-50.294162860118234,139.72315673930393,20,/home/pi/astropi/astropi/photo_0004.jpg
+2022-02-03 19:27,day,-50.14968275884533,140.53734410165632,20,/home/pi/astropi/astropi/photo_0005.jpg
+2022-02-03 19:27,day,-50.00047776782515,141.33863536476593,20,/home/pi/astropi/astropi/photo_0006.jpg
+2022-02-03 19:27,day,-49.845763185849435,142.13218554651107,20,/home/pi/astropi/astropi/photo_0007.jpg
+2022-02-03 19:28,day,-49.685383390482116,142.91925457119487,20,/home/pi/astropi/astropi/photo_0008.jpg
+2022-02-03 19:28,day,-49.51839674560517,143.70451306276055,20,/home/pi/astropi/astropi/photo_0009.jpg
+2022-02-03 19:28,day,-49.34566218076681,144.48392169633004,20,/home/pi/astropi/astropi/photo_0010.jpg
+2022-02-03 19:28,day,-49.16753969470252,145.25617394771086,20,/home/pi/astropi/astropi/photo_0011.jpg
+2022-02-03 19:28,day,-48.98213878217151,146.02936515663887,20,/home/pi/astropi/astropi/photo_0012.jpg
