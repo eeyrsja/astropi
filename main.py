@@ -103,18 +103,17 @@ def get_iss_position():
     return latitude, longitude
 
 
-def get_nearest_city(latitude, longitude):
+def get_nearest_city(latlong):
     """
     this function finds out the closest city to the ISS.
 
     Sometimes when over the ocean we found out the ISS can be a long way from the city though!
-    :param latitude: latitude of ISS
-    :param longitude: longitude of ISS
+    :param latlong: latitude and longitude of ISS
     :return: the name of the closest city
     """
     logger.info(f"Function: get_nearest_city")
-    location = reverse_geocoder.search((latitude, longitude))
-    return(f"{location['name']}, {location['admin1']}, {location['admin2']}")
+    location = reverse_geocoder.search((latlong[0], latlong[1]))
+    return(f"{location['name']} : {location['admin1']} : {location['admin2']}")
 
 
 def get_day_night():
@@ -159,10 +158,11 @@ while (now_time < start_time + timedelta(minutes=2)):  #TODO change to 175 minut
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
         day_or_night = get_day_night()
         iss_position = get_iss_position()
+        nearest_city = get_nearest_city(iss_position)
         cloud_percent = get_cloud_percent(photo_file)
 
         # Write the results to CSV file
-        add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent, photo_file)
+        add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], nearest_city, cloud_percent, photo_file)
 
         # Log the event
         sleep(6)  # 1 minute sleep  #TODO - check how long to sleep for
