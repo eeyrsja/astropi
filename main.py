@@ -1,6 +1,6 @@
 # Main Python Script for JBVK Astro Pi Project
 # --------------------------------------------
-# JBVK:
+# JBVK are:
 #   Jack McKinnon
 #   Ben Alexander
 #   Victor Florek
@@ -17,17 +17,17 @@ from orbit import ISS
 from skyfield.api import load
 from time import sleep
 
-# Running time information
-start_time = datetime.now()
-now_time = datetime.now()
-counter = 1
-logger.info(f"Started running: {start_time}")
-
 # Set up base folder and files
 base_folder = Path(__file__).parent.resolve()
 data_file = base_folder/'data.csv'
 logfile(base_folder/"events.log")
 logger.info(f"Base folder: {base_folder}")
+
+# Running time information
+start_time = datetime.now()
+now_time = datetime.now()
+counter = 1
+logger.info(f"Started running: {start_time}")
 
 # Parameters for ISS position finding
 ephemeris = load('de421.bsp')
@@ -128,26 +128,29 @@ counter =1
 
 # Main program loop for just less than 3 hours (180 minutes)
 while (now_time < start_time + timedelta(minutes=2)): #TODO change to 175 minutes
-    # Take a photo and save it
-    photo_file = base_folder/f'photo_{counter:04}.jpg'
-    camera.start_preview(alpha=128)
-    sleep(2) # Camera warm-up time
-    camera.capture(str(photo_file))
-    camera.stop_preview()
-
-    # Get measurements
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
-    day_or_night = get_day_night()
-    iss_position = get_iss_position()
-    cloud_percent = get_cloud_percent(photo_file)
-
-    # Write the results to CSV file
-    add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent, photo_file)
-
-    # Log the event
     logger.info(f"Main loop counter: {counter}")
-    sleep(6) # 1 minute sleep #TODO - check how long to sleep for
+        try:
+        # Take a photo and save it
+        photo_file = base_folder/f'photo_{counter:04}.jpg'
+        camera.start_preview(alpha=128)
+        sleep(2) # Camera warm-up time
+        camera.capture(str(photo_file))
+        camera.stop_preview()
 
-    # Update the current time and counter
-    now_time = datetime.now()
-    counter = counter + 1
+        # Get measurements
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+        day_or_night = get_day_night()
+        iss_position = get_iss_position()
+        cloud_percent = get_cloud_percent(photo_file)
+
+        # Write the results to CSV file
+        add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], cloud_percent, photo_file)
+
+        # Log the event
+        sleep(6) # 1 minute sleep #TODO - check how long to sleep for
+
+        # Update the current time and counter
+        now_time = datetime.now()
+        counter = counter + 1
+    except:
+        logger.info(f"Error in loop: {counter}")
