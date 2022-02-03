@@ -3,9 +3,8 @@ from PIL import Image, ImageFilter, ImageEnhance
 from pathlib import Path
 from time import sleep
 
-base_folder = Path(__file__).parent.resolve()
+# notes:
 # https://picamera.readthedocs.io/en/release-1.13/recipes1.html
-
 # https://pillow.readthedocs.io/en/stable/handbook/tutorial.html
 
 
@@ -13,7 +12,7 @@ base_folder = Path(__file__).parent.resolve()
 camera = PiCamera()
 camera.resolution = (1296, 972)
 
-
+base_folder = Path(__file__).parent.resolve()
 photo_file = base_folder/'photo.jpg'
 camera.start_preview(alpha=192)
 sleep(.1) # Camera warm-up time
