@@ -19,6 +19,8 @@ from orbit import ISS
 from skyfield.api import load
 import reverse_geocoder
 from time import sleep
+import numpy
+from PIL import Image
 
 # Set up base folder and files
 base_folder = Path(__file__).parent.resolve()
@@ -131,27 +133,59 @@ def get_day_night():
 
 
 def get_cloud_percent(photo):
-    # TODO - lots of work to do!
+    """
+    This function opens a photo and tries to estimate how much of the picture is covered by cloud.
+
+    :param photo: the filename of the photo
+    :return: the percentage of cloud cover in the photo
+    """
     logger.info(f"Function: get_cloud_percent")
-    return 20
+
+    #open the image
+    image = Image.open(photo)
+
+    # Convert image to array
+    data = numpy.asarray(image)
+
+    # Increase the image contrast
+    # this is copied from https://stackoverflow.com/questions/48406578/adjusting-contrast-of-image-purely-with-numpy
+    minval = numpy.percentile(data, 10)
+    maxval = numpy.percentile(data, 90)
+    data = numpy.clip(data, minval, maxval)
+    data = ((data - minval) / (maxval - minval)) * 255
+
+    # Convert from R,G,B colour to grey
+    data_grey = (data[:, :, 0] + data[:, :, 1] + data[:, :, 2]) / 3
+
+    # Apply threshold - if the number is more than the threshold then we treat it as cloud
+    d = data_grey > 160
+
+    # Work out the percentage cloud cover
+    white_pixel_count = d.sum()
+    total_pixel_count = d.size
+    cloud_cover_pct = 100.0 * white_pixel_count / total_pixel_count
+
+    # TODO there is a missing bit of code to deal with the black bit around the edge of the photo
+
+    return cloud_cover_pct
 
 
-# MAIN TASK
+# MAIN LOOP
 # ---------
 
 # Set up the output file
 create_csv(data_file)
-counter =1
+counter = 1
 
 # Main program loop for just less than 3 hours (180 minutes)
 while (now_time < start_time + timedelta(minutes=2)):  #TODO change to 175 minutes
     logger.info(f"Main loop counter: {counter}")
     try:
         # Take a photo and save it
-        photo_file = base_folder/f'photo_{counter:04}.jpg'
+        photo_file = str(base_folder/f'photo_{counter:04}.jpg')
         camera.start_preview(alpha=128)  # Semi-see-through
         sleep(2)  # Camera warm-up time
-        camera.capture(str(photo_file))
+        camera.capture(photo_file)
         camera.stop_preview()
 
         # Get measurements
