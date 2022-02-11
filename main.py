@@ -19,7 +19,7 @@ from orbit import ISS
 from skyfield.api import load
 import reverse_geocoder
 from time import sleep
-import numpy
+from numpy import array, percentile, clip
 from PIL import Image
 
 # Set up base folder and files
@@ -144,30 +144,38 @@ def get_cloud_percent(photo):
     #open the image
     image = Image.open(photo)
 
-    # Convert image to array
-    data = numpy.asarray(image)
+    # rotate the picture - we think it is upside down?!
+    image = image.rotate(180)
 
-    # Increase the image contrast
+    # Crop the photo to remove the window frame
+    width = image.size[0]
+    height = image.size[1]
+    image = image.crop((width * 0.15, height * 0.15, width * 0.85, height * 0.85))
+
+    # Convert from R,G,B colour to H,S,V
+    # WWe want to find clouds which have low "S"aturation and high "V"alue (or brightness)
+    image_hsv = array(image.convert("HSV"))
+
+    # Get the Saturation and Brightness parts
+    saturation = image_hsv[:,:,1] / 255  # saturation is how colourful the pixel is - clouds are not colourful so saturation is low
+    brightness = image_hsv[:, :, 2] / 255 # brightness of clouds is high
+
+    # Increase the photo contrast - make the whites whiter and the blacks blacker
     # this is copied from https://stackoverflow.com/questions/48406578/adjusting-contrast-of-image-purely-with-numpy
-    minval = numpy.percentile(data, 10)
-    maxval = numpy.percentile(data, 90)
-    data = numpy.clip(data, minval, maxval)
-    data = ((data - minval) / (maxval - minval)) * 255
+    minval = percentile(brightness, 5)
+    maxval = percentile(brightness, 95)
+    brightness = clip(brightness, minval, maxval)
+    brightness = ((brightness - minval) / (maxval - minval))
 
-    # Convert from R,G,B colour to grey
-    data_grey = (data[:, :, 0] + data[:, :, 1] + data[:, :, 2]) / 3
+    # Apply threshold - if the number is less than saturation threshold AND more than brightness threshold then we treat it as cloud
+    clouds = (saturation < 0.3) & (brightness > 0.5)
 
-    # Apply threshold - if the number is more than the threshold then we treat it as cloud
-    d = data_grey > 160
+    # Work out the percentage cloud cover by adding up all the cloud pixels and dividing by total pixels
+    cloud_pixel_count = clouds.sum()
+    total_pixel_count = clouds.size
+    cloud_percent = 100.0 * cloud_pixel_count / total_pixel_count
 
-    # Work out the percentage cloud cover
-    white_pixel_count = d.sum()
-    total_pixel_count = d.size
-    cloud_cover_pct = 100.0 * white_pixel_count / total_pixel_count
-
-    # TODO there is a missing bit of code to deal with the black bit around the edge of the photo
-
-    return cloud_cover_pct
+    return cloud_percent
 
 
 # MAIN LOOP
