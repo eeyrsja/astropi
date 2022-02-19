@@ -56,7 +56,7 @@ def create_csv(data_file):
     try:
         with open(data_file, 'w') as f:
             writer = csv.writer(f)
-            header = ("Time", "Day_or_Night", "Latitude", "Longitude", "Nearest City", "Cloud_Percent", "Photo_File")
+            header = ("Time", "Local Time", "Day_or_Night", "Latitude", "Longitude", "Nearest City", "Cloud_Percent", "Photo_File")
             writer.writerow(header)
         return True
     except:
@@ -64,7 +64,7 @@ def create_csv(data_file):
         return False
 
 
-def add_results_to_csv(data_file, time, day_or_night, latitude, longitude, nearest_city, cloud_percent, photo_file):
+def add_results_to_csv(data_file, time, local_time, day_or_night, latitude, longitude, nearest_city, cloud_percent, photo_file):
     """
     this function puts the data in a .csv file.
     
@@ -72,6 +72,7 @@ def add_results_to_csv(data_file, time, day_or_night, latitude, longitude, neare
 
     :param data_file: the name of the file to save the results in
     :param time: the actual time when data collected
+    :param local_time: the time on the ground where ISS is now
     :param day_or_night: is it daytime or night time?
     :param latitude: location of ISS
     :param longitude: location of ISS
@@ -84,7 +85,7 @@ def add_results_to_csv(data_file, time, day_or_night, latitude, longitude, neare
     try:
         with open(data_file, 'a') as f:
             writer = csv.writer(f)
-            result = (time, day_or_night, latitude, longitude, nearest_city, cloud_percent, photo_file)
+            result = (time, local_time, day_or_night, latitude, longitude, nearest_city, cloud_percent, photo_file)
             writer.writerow(result)
         return True
     except:
@@ -130,7 +131,24 @@ def get_day_night():
         return "day"
     else:
         return "night"
-
+    
+    
+def get_local_time(time, iss_position):
+    """
+    this function works out what time it is on the ground where the ISS current is.
+    it works this out by looking at the longitude of the ISS (how far round the earth it is)
+    15 degrees of longitude means 1 hour time difference
+    
+    :param time: the time now
+    :param iss_position: the location of the ISS
+    :return: the local time on the ground where ISS is now
+    """
+    logger.info(f"Function: get_local_time")
+    longitude = iss_position[1]
+    hour_diff = longitude / 15.0 #degrees
+    
+    return time + timedelta(hours = hour_diff)
+    
 
 def get_cloud_percent(photo):
     """
@@ -178,28 +196,31 @@ create_csv(data_file)
 counter = 1
 
 # Main program loop for just less than 3 hours (180 minutes)
-while (now_time < start_time + timedelta(minutes=175)):  #TODO change to 175 minutes
+# It runs every 15 seconds - so we will get about 700 photos in total
+# 700 photos is about 700MB we think so is much less than the 3000MB file size limit
+while (now_time < start_time + timedelta(minutes=175)):
     logger.info(f"Main loop counter: {counter}")
     try:
         # Take a photo and save it
         photo_file = str(base_folder/f'photo_{counter:04}.jpg')
         camera.start_preview(alpha=128)  # Semi-see-through
-        sleep(2)  # Camera warm-up time
+        sleep(0.5)  # Camera warm-up time
         camera.capture(photo_file)
         camera.stop_preview()
 
         # Get measurements
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+        current_datetime = datetime.now()
         day_or_night = get_day_night()
         iss_position = get_iss_position()
+        local_time = get_local_time(current_datetime, iss_position)
         nearest_city = get_nearest_city(iss_position)
         cloud_percent = get_cloud_percent(photo_file)
 
         # Write the results to CSV file
-        add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], nearest_city, cloud_percent, photo_file)
+        add_results_to_csv(data_file, current_datetime, local_time, day_or_night, iss_position[0], iss_position[1], nearest_city, cloud_percent, photo_file)
 
         # Log the event
-        sleep(60)  # 1 minute sleep  #TODO - check how long to sleep for
+        sleep(15)  # 15 second sleep
 
         # Update the current time and counter
         now_time = datetime.now()
