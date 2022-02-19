@@ -114,7 +114,7 @@ def get_nearest_city(latlong):
     :return: the name of the closest city
     """
     logger.info(f"Function: get_nearest_city")
-    location = reverse_geocoder.search((latlong[0], latlong[1]))
+    location = reverse_geocoder.search((latlong[0], latlong[1]))[0]
     return(f"{location['name']} : {location['admin1']} : {location['admin2']}")
 
 
@@ -151,25 +151,17 @@ def get_cloud_percent(photo):
     width = image.size[0]
     height = image.size[1]
     image = image.crop((width * 0.15, height * 0.15, width * 0.85, height * 0.85))
-
     # Convert from R,G,B colour to H,S,V
-    # WWe want to find clouds which have low "S"aturation and high "V"alue (or brightness)
+    # We want to find clouds which have low "S"aturation and high "V"alue (or brightness)
     image_hsv = array(image.convert("HSV"))
 
     # Get the Saturation and Brightness parts
     saturation = image_hsv[:,:,1] / 255  # saturation is how colourful the pixel is - clouds are not colourful so saturation is low
     brightness = image_hsv[:, :, 2] / 255 # brightness of clouds is high
 
-    # Increase the photo contrast - make the whites whiter and the blacks blacker
-    # this is copied from https://stackoverflow.com/questions/48406578/adjusting-contrast-of-image-purely-with-numpy
-    minval = percentile(brightness, 5)
-    maxval = percentile(brightness, 95)
-    brightness = clip(brightness, minval, maxval)
-    brightness = ((brightness - minval) / (maxval - minval))
-
     # Apply threshold - if the number is less than saturation threshold AND more than brightness threshold then we treat it as cloud
     clouds = (saturation < 0.3) & (brightness > 0.5)
-
+    
     # Work out the percentage cloud cover by adding up all the cloud pixels and dividing by total pixels
     cloud_pixel_count = clouds.sum()
     total_pixel_count = clouds.size
@@ -186,7 +178,7 @@ create_csv(data_file)
 counter = 1
 
 # Main program loop for just less than 3 hours (180 minutes)
-while (now_time < start_time + timedelta(minutes=2)):  #TODO change to 175 minutes
+while (now_time < start_time + timedelta(minutes=175)):  #TODO change to 175 minutes
     logger.info(f"Main loop counter: {counter}")
     try:
         # Take a photo and save it
@@ -207,10 +199,12 @@ while (now_time < start_time + timedelta(minutes=2)):  #TODO change to 175 minut
         add_results_to_csv(data_file, current_datetime, day_or_night, iss_position[0], iss_position[1], nearest_city, cloud_percent, photo_file)
 
         # Log the event
-        sleep(6)  # 1 minute sleep  #TODO - check how long to sleep for
+        sleep(60)  # 1 minute sleep  #TODO - check how long to sleep for
 
         # Update the current time and counter
         now_time = datetime.now()
         counter = counter + 1
     except:
         logger.error(f"Error in loop: {counter}")
+
+print(f"Start time: {start_time}\nEnd time:   {now_time}")
