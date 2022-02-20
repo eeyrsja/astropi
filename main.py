@@ -19,7 +19,7 @@ from orbit import ISS
 from skyfield.api import load
 import reverse_geocoder
 from time import sleep
-from numpy import array, percentile, clip
+from numpy import array
 from PIL import Image
 
 # Set up base folder and files
@@ -31,7 +31,6 @@ logger.info(f"Base folder: {base_folder}")
 # Run time information
 start_time = datetime.now()
 now_time = datetime.now()
-counter = 1
 logger.info(f"Started running: {start_time}")
 
 # Parameters for ISS position finding
@@ -73,7 +72,7 @@ def add_results_to_csv(data_file, time, local_time, day_or_night, latitude, long
     :param data_file: the name of the file to save the results in
     :param time: the actual time when data collected
     :param local_time: the time on the ground where ISS is now
-    :param day_or_night: is it daytime or night time?
+    :param day_or_night: is it daytime or nighttime?
     :param latitude: location of ISS
     :param longitude: location of ISS
     :param nearest_city: closest city to the ISS now
@@ -137,7 +136,7 @@ def get_local_time(time, iss_position):
     """
     this function works out what time it is on the ground where the ISS current is.
     it works this out by looking at the longitude of the ISS (how far round the earth it is)
-    15 degrees of longitude means 1 hour time difference
+    15 degrees of longitude means 1-hour time difference
     
     :param time: the time now
     :param iss_position: the location of the ISS
@@ -145,9 +144,9 @@ def get_local_time(time, iss_position):
     """
     logger.info(f"Function: get_local_time")
     longitude = iss_position[1]
-    hour_diff = longitude / 15.0 #degrees
+    hour_diff = longitude / 15.0  # degrees
     
-    return time + timedelta(hours = hour_diff)
+    return time + timedelta(hours=hour_diff)
     
 
 def get_cloud_percent(photo):
@@ -159,7 +158,7 @@ def get_cloud_percent(photo):
     """
     logger.info(f"Function: get_cloud_percent")
 
-    #open the image
+    # open the image
     image = Image.open(photo)
 
     # rotate the picture - we think it is upside down?!
@@ -168,13 +167,13 @@ def get_cloud_percent(photo):
     # Crop the photo to remove the window frame
     width = image.size[0]
     height = image.size[1]
-    image = image.crop((width * 0.15, height * 0.15, width * 0.85, height * 0.85))
+    image = image.crop((int(width * 0.15), int(height * 0.15), int(width * 0.85), int(height * 0.85)))
     # Convert from R,G,B colour to H,S,V
     # We want to find clouds which have low "S"aturation and high "V"alue (or brightness)
     image_hsv = array(image.convert("HSV"))
 
     # Get the Saturation and Brightness parts
-    saturation = image_hsv[:,:,1] / 255  # saturation is how colourful the pixel is - clouds are not colourful so saturation is low
+    saturation = image_hsv[:, :, 1] / 255  # saturation is how colourful the pixel is - clouds are not colourful so saturation is low
     brightness = image_hsv[:, :, 2] / 255 # brightness of clouds is high
 
     # Apply threshold - if the number is less than saturation threshold AND more than brightness threshold then we treat it as cloud
@@ -197,8 +196,8 @@ counter = 1
 
 # Main program loop for just less than 3 hours (180 minutes)
 # It runs every 15 seconds - so we will get about 700 photos in total
-# 700 photos is about 700MB we think so is much less than the 3000MB file size limit
-while (now_time < start_time + timedelta(minutes=175)):
+# 700 photos is about 700 MB we think so is much less than the 3000 MB file size limit
+while now_time < start_time + timedelta(minutes=175):
     logger.info(f"Main loop counter: {counter}")
     try:
         # Take a photo and save it
@@ -219,13 +218,14 @@ while (now_time < start_time + timedelta(minutes=175)):
         # Write the results to CSV file
         add_results_to_csv(data_file, current_datetime, local_time, day_or_night, iss_position[0], iss_position[1], nearest_city, cloud_percent, photo_file)
 
-        # Log the event
-        sleep(15)  # 15 second sleep
+        # Wait before starting the loop again
+        sleep(15)  # 15-second sleep
 
         # Update the current time and counter
         now_time = datetime.now()
         counter = counter + 1
     except:
+        # There has been a problem. We will try again.
         logger.error(f"Error in loop: {counter}")
 
 print(f"Start time: {start_time}\nEnd time:   {now_time}")
